@@ -58,6 +58,10 @@ class BoardDrag extends Component {
     }
 
   };
+
+  roundToNearest = (x, roundTo) => {
+    return (x % roundTo) >= (roundTo/2) ? parseInt(x / roundTo) * roundTo + roundTo : parseInt(x / roundTo) * roundTo;
+  }
   
   handleDragEnd = (e, index, type) => {
     if ( !this.state.drawMode ) {
@@ -72,8 +76,9 @@ class BoardDrag extends Component {
       });  
 
       let thing = this.state[type];
-      thing[index].x = e.evt.clientX;
-      thing[index].y = e.evt.clientY;
+      
+      thing[index].x = e.currentTarget._lastPos.x; // this.roundToNearest(e.evt.clientX, 1);
+      thing[index].y =  e.currentTarget._lastPos.y; //this.roundToNearest(e.evt.clientY, 1);
 
       this.setState({ [type]: thing });
     }
@@ -159,8 +164,8 @@ class BoardDrag extends Component {
               var ohs = this.state.ohs;
               
               ohs.push({
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight
+                x: (window.innerWidth / 2) - 150 + (Math.random() * 300),
+                y: window.innerHeight / 2
               });
               
               this.setState({
@@ -187,8 +192,8 @@ class BoardDrag extends Component {
               var textes = this.state.textes;
               
               textes.push({
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
+                x: (window.innerWidth / 2) - 150 + (Math.random() * 300),
+                y: window.innerHeight / 2,
                 text: elem.text
               });
               
@@ -217,8 +222,8 @@ class BoardDrag extends Component {
               var exes = this.state.exes;
               
               exes.push({
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight
+                x: (window.innerWidth / 2) - 150 + (Math.random() * 300),
+                y: window.innerHeight / 2
               });
               
               this.setState({
