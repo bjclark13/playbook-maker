@@ -1,39 +1,12 @@
 import React, { Component } from 'react';
 import Konva from 'konva';
-import { Stage, Layer, Circle, Line, Arrow, Text } from 'react-konva';
+import { Stage, Layer, Line, Arrow, Text } from 'react-konva';
+import { Oh, CustomText, Ex, Square } from './drag/Icons';
+import Editor from './Editor';
 
 class BoardDrag extends Component {
   constructor(props) {
     super(props);
-    
-    this.styles = {
-      size: 20
-    };
-    
-    this.editorValues = {
-      textes: [
-        {
-          text: 'QB',
-        },
-        {
-          text: 'HB',
-        },
-        {
-          text: 'FB',
-        },
-        {
-          text: 'C',
-        },
-        {
-          text: 'Y',
-        },
-        {
-          text: 'Z',
-        },
-      ],
-      exes: [ {} ],
-      ohs: [ {} ]
-    };
     
     this.state = {        
       textes: [],
@@ -41,8 +14,13 @@ class BoardDrag extends Component {
       ohs: [],
       lines: [],
       arrows: [],
-      drawMode: false
+      squares: [],
+      drawMode: false, // can be false, line or arrow
     };
+  }
+  
+  componentDidMount() {
+    this.getLocalChanges();
   }
   
   handleDragStart = e => {
@@ -56,16 +34,35 @@ class BoardDrag extends Component {
         // scaleY: 1.5
       });      
     }
-
+    
   };
-
+  
   roundToNearest = (x, roundTo) => {
     return (x % roundTo) >= (roundTo/2) ? parseInt(x / roundTo) * roundTo + roundTo : parseInt(x / roundTo) * roundTo;
   }
   
+  saveProgress = () => {
+    let activeState = this.state;
+    delete activeState.drawMode;
+    delete activeState.editing;
+    
+    window.sessionStorage.setItem( 'playbook-active', JSON.stringify(this.state) );
+  };
+  
+  getLocalChanges = () => {
+    var initialState;
+    
+    if ( initialState = window.sessionStorage.getItem('playbook-active') ) {
+      this.setState(JSON.parse(initialState));
+    }
+  };
+  
+  publishChanges = () => {
+    window.sessionStorage.removeItem('playbook-active');
+  };
+  
   handleDragEnd = (e, index, type) => {
     if ( !this.state.drawMode ) {
-      console.log(e);
       e.target.to({
         duration: 0.5,
         //  easing: Konva.Easings.ElasticEaseOut,
@@ -74,13 +71,13 @@ class BoardDrag extends Component {
         // shadowOffsetX: 5,
         // shadowOffsetY: 5
       });  
-
+      
       let thing = this.state[type];
       
       thing[index].x = e.currentTarget._lastPos.x; // this.roundToNearest(e.evt.clientX, 1);
       thing[index].y =  e.currentTarget._lastPos.y; //this.roundToNearest(e.evt.clientY, 1);
-
-      this.setState({ [type]: thing });
+      
+      this.setState({ [type]: thing }, this.saveProgress);
     }
   };
   
@@ -108,19 +105,35 @@ class BoardDrag extends Component {
       // first is
       let stage = this.stageRef.getStage();
       
-      let lines = this.state.lines;
+
+
+      let lines = this.state[this.state.drawMode];
       
       lines.push({
         points: this.state.editing
       })
-            
+      
       this.setState({
-        lines: lines, 
+        [this.state.drawMode]: lines, 
         editing: false
       })
     }
   };
   
+  addToBoard = (type, item) => {
+    var items = this.state[type];
+    
+    var item = Object.assign({
+      x: (window.innerWidth / 2) - 150 + (Math.random() * 300),
+      y: window.innerHeight / 2
+    }, item);
+    
+    items.push(item);
+    
+    this.setState({
+      [type]: items
+    })
+  };
   
   render() {
     var total = 0;
@@ -135,9 +148,10 @@ class BoardDrag extends Component {
         this.stageRef = ref;
       }}
       >
-      <Layer>
       
-      <Text y={5} x={ 50 } text = "Click an icon to add to the play" />
+      <Editor addToBoard={this.addToBoard} />
+      
+      <Layer>
       
       {
         this.state.drawMode ? 
@@ -145,113 +159,23 @@ class BoardDrag extends Component {
         :
         <Text y={150} x={ 50 } text = "Mode: Dragging: Click on an icon to move them around" />
       }
-
-      <Text y={170} x={ 50 } onClick={ () => this.setState( { drawMode: !this.state.drawMode} ) } text="Switch Mode" />
-
-      {
-        this.editorValues.ohs.map( (oh, index) => {
-          total ++; 
-          
-          return(
-            <Circle 
-            x={total * 60} 
-            y={ 35 } 
-            radius={10} 
-            fill="white"
-            stroke="black"
-            shadowColor={'black'}
-            onClick={ () =>  {
-              var ohs = this.state.ohs;
-              
-              ohs.push({
-                x: (window.innerWidth / 2) - 150 + (Math.random() * 300),
-                y: window.innerHeight / 2
-              });
-              
-              this.setState({
-                ohs: ohs
-              })
-            }
-          }
-          />
-          );
-        }, this)
-      }
+    
+      <Text y={190} x={ 50 } onClick={ () => this.setState( { drawMode: 'lines'} ) } text="Draw Lines" />
+      <Text y={210} x={ 50 } onClick={ () => this.setState( { drawMode: 'arrows'} ) } text="Draw Arrows" />   
+      {/* <Text y={170} x={ 50 } onClick={ () => this.setState( { drawMode: !this.state.drawMode} ) } text="Draw Dotted Lines" />
+      <Text y={170} x={ 50 } onClick={ () => this.setState( { drawMode: !this.state.drawMode} ) } text="Draw Blocking Lines" /> */}
+      <Text y={230} x={ 50 } onClick={ () => this.setState( { drawMode: false } ) } text="Switch to Drawing Mode" />  
       
-      {
-        this.editorValues.textes.map( (elem, index) => {
-          total ++; 
-          
-          return( 
-            <Text 
-            fontSize={this.styles.size}
-            text={elem.text} 
-            x={total * 60} 
-            y={ 25 } 
-            onClick={ () =>  {
-              var textes = this.state.textes;
-              
-              textes.push({
-                x: (window.innerWidth / 2) - 150 + (Math.random() * 300),
-                y: window.innerHeight / 2,
-                text: elem.text
-              });
-              
-              this.setState({
-                textes: textes
-              })
-            }
-          }
-          />
-          )
-        })
-      }
-      
-      {
-        this.editorValues.exes.map( (ex, index) => {
-          total ++; 
-          
-          return( 
-            <Text 
-            fontSize={this.styles.size}
-            key={index}
-            text="X" 
-            x={total * 60} 
-            y={ 25 } 
-            onClick={ () =>  {
-              var exes = this.state.exes;
-              
-              exes.push({
-                x: (window.innerWidth / 2) - 150 + (Math.random() * 300),
-                y: window.innerHeight / 2
-              });
-              
-              this.setState({
-                exes: exes
-              })
-            }
-          }
-          />
-          )
-        })
-      }
-      
-      
-      { /** Live State */}
       {
         this.state.ohs.map( (oh, index) => {
           return( 
-            <Circle 
+            <Oh 
             x={ oh.x } 
             y={ oh.y } 
-            radius={10} 
-            fill="#fff"
-            stroke="black"
             draggable={!this.state.drawMode}
             key={index}
             onDragStart={ this.handleDragStart }
             onDragEnd={ e => this.handleDragEnd(e, index, 'ohs') }
-            shadowColor={'black'}
             onClick={ ()  => this.setState( { editing: [oh.x, oh.y] }) }
             />
             )
@@ -259,70 +183,85 @@ class BoardDrag extends Component {
         }
         
         {
-          this.state.lines.map( (line, index) => {
-            return(
-              <Line
-              points={line.points}
-              stroke='black'
-              tension={1}
+          this.state.squares.map( (square, index) => {
+            return( 
+              <Square 
+              x={ square.x } 
+              y={ square.y } 
+              draggable={!this.state.drawMode}
+              key={index}
+              onDragStart={ this.handleDragStart }
+              onDragEnd={ e => this.handleDragEnd(e, index, 'squares') }
+              onClick={ ()  => this.setState( { editing: [square.x, square.y] }) }
               />
               )
-            } 
-            )
+            })
           }
           
           {
-            this.state.arrows.map( (arrow, index) => {
+            this.state.lines.map( (line, index) => {
               return(
                 <Line
-                points={arrow.points}
+                points={line.points}
                 stroke='black'
                 tension={1}
                 />
                 )
-              }
+              } 
               )
             }
             
             {
-              this.state.textes.map( (elem, index) => {
-                return( 
-                  <Text 
-                  fontSize={this.styles.size}
-                  draggable={!this.state.drawMode}
-                  key={index}
-                  onDragStart={this.handleDragStart}
-                  onDragEnd={ e => this.handleDragEnd(e, index, 'textes') }
-                  text={elem.text} 
-                  x={ elem.x } 
-                  y={ elem.y } 
-                  onClick={ ()  => this.setState( { editing: [elem.x, elem.y] }) }
+              this.state.arrows.map( (arrow, index) => {
+                return(
+                  <Arrow
+                  points={arrow.points}
+                  stroke='black'
+                  fill='black'
+                  tension={1}
                   />
                   )
-                })
+                }
+                )
               }
               
               {
-                this.state.exes.map( (ex, index) => {
+                this.state.textes.map( (elem, index) => {
                   return( 
-                    <Text 
-                    fontSize={this.styles.size}
+                    <CustomText 
                     draggable={!this.state.drawMode}
                     key={index}
                     onDragStart={this.handleDragStart}
-                    onDragEnd={ e => this.handleDragEnd(e, index, 'exes') }
-                    text="X" 
-                    x={ ex.x } 
-                    y={ ex.y } 
-                    onClick={ ()  => this.setState( { editing: [ex.x, ex.y] }) }
+                    onDragEnd={ e => this.handleDragEnd(e, index, 'textes') }
+                    text={elem.text} 
+                    x={ elem.x } 
+                    y={ elem.y } 
+                    onClick={ ()  => this.setState( { editing: [elem.x, elem.y] }) }
                     />
                     )
                   })
                 }
-                </Layer>
-                </Stage>
-                );
+                
+                {
+                  this.state.exes.map( (ex, index) => {
+                    return( 
+                      <Ex 
+                      draggable={!this.state.drawMode}
+                      key={index}
+                      onDragStart={this.handleDragStart}
+                      onDragEnd={ e => this.handleDragEnd(e, index, 'exes') }
+                      text="X" 
+                      x={ ex.x } 
+                      y={ ex.y } 
+                      onClick={ ()  => this.setState( { editing: [ex.x, ex.y] }) }
+                      />
+                      )
+                    })
+                  }
+                  </Layer>
+                  </Stage>
+                  );
+                }
               }
-            }
-            
-            export default BoardDrag;
+              
+              export default BoardDrag;
