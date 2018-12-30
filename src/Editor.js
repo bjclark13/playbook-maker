@@ -48,8 +48,10 @@ class Editor extends React.Component {
                         <Oh 
                         x={total * 60} 
                         y={ 35 } 
-                        onClick={ () => this.props.addToBoard('ohs')
-                    }
+                        onClick={ e => {                             
+                            this.props.addToBoard('ohs')
+                        }
+                        }
                     />
                     );
                 }, this)
@@ -64,8 +66,10 @@ class Editor extends React.Component {
                         key={index}
                         x={total * 60} 
                         y={ 25 } 
-                        onClick={ () => this.props.addToBoard('ohs') }
-                    />
+                        onClick={ e => {                             
+                            this.props.addToBoard('ohs') }
+                        }
+                            />
                     )
                 })
             }
@@ -79,8 +83,11 @@ class Editor extends React.Component {
                             key={index}
                             x={total * 60} 
                             y={ 25 } 
-                            onClick={ () => this.props.addToBoard('squares')
-                        }
+                            onClick={ e => { 
+                                
+                                this.props.addToBoard('squares')
+                            }
+                            }
                     />
                     )
                 })
@@ -95,8 +102,10 @@ class Editor extends React.Component {
                         text={elem.text} 
                         x={total * 60} 
                         y={ 25 } 
-                        onClick={ () => this.props.addToBoard('textes', {text: elem.text} )
-                    }
+                        onClick={ e => {                             
+                            this.props.addToBoard('textes', {text: elem.text} )
+                        }
+                        }
                     />
                     )
                 })
