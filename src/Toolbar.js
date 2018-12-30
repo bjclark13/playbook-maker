@@ -33,7 +33,6 @@ class AppToolbar extends React.Component {
     };
 
     toggleDrawMenu = () => {
-        console.log('open the menu');
         this.setState({ drawMenuOpen: !this.state.drawMenuOpen });
     };
 

@@ -38,7 +38,7 @@ class BoardDrag extends Component {
       squares: [],
       dottedLines: [],
       drawMode: false, // can be false, line or arrow
-      straightMode: true
+      straightMode: false
     };
   }
   
@@ -65,11 +65,9 @@ class BoardDrag extends Component {
   }
   
   saveProgress = () => {
-    let activeState = this.state;
-    delete activeState.drawMode;
-    delete activeState.editing;
+    let activeState = Object.assign(this.state, {});
     
-    window.sessionStorage.setItem( 'playbook-active', JSON.stringify(this.state) );
+    window.sessionStorage.setItem( 'playbook-active', JSON.stringify(activeState) );
   };
   
   getLocalChanges = () => {
@@ -146,7 +144,6 @@ class BoardDrag extends Component {
   }
 
   handleMouseUp = e => {
-    console.log('event!!', this.state.drawMode);
     
     if ( this.state.drawMode ) {
       if ( this.state.editing ) {
@@ -155,17 +152,14 @@ class BoardDrag extends Component {
         lines.push({
           points: this.state.editing
         })
-        
+
         this.setState({
           [this.state.drawMode]: lines, 
           editing: false
         }, this.saveProgress);
       }
       
-      console.log(this.state);
-
       if ( this.state.straightMode ) {
-          console.log('in straight mode');
           let lines = this.state[this.state.drawMode];
 
           // first is
@@ -231,7 +225,9 @@ class BoardDrag extends Component {
 
       <ActionToolbar 
         addToBoard={this.addToBoard}
-        setMode={ (mode) => this.setState({ drawMode: mode }) }
+        setMode={ (mode) => {
+          this.setState({ drawMode: mode });   
+        }}
         drawMode={this.state.drawMode}
       />
       
