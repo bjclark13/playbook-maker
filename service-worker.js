@@ -14,7 +14,7 @@
 importScripts("https://storage.googleapis.com/workbox-cdn/releases/3.6.3/workbox-sw.js");
 
 importScripts(
-  "/playbook-maker/precache-manifest.adb621aaabaec94f5d10073de12f004b.js"
+  "/playbook-maker/precache-manifest.7306c24f7702499fa13446a184ee219a.js"
 );
 
 workbox.clientsClaim();
