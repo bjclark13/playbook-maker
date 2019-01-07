@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import Konva from 'konva';
-import { Stage, Layer, Text, Line as KonvaLine } from 'react-konva';
+import { Stage, Layer, Text } from 'react-konva';
+import FootballField from './layers/FootballField';
+
 import { Oh, CustomText, Ex, Square } from './drag/Icons';
 import { Line, DottedLine, Arrow } from './draw/Lines';
 import ActionToolbar from './Toolbar';
@@ -9,10 +10,9 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+// import Headspace from 'react-headspace';
 
 import sample from './samples/1';
-
-//  Editor from './Editor';
 
 class BoardDrag extends Component {
   constructor(props) {
@@ -26,7 +26,8 @@ class BoardDrag extends Component {
       arrows: [],
       squares: [],
       dottedLines: [],
-      drawMode: false, // can be false, line or arrow
+      drawMode: false, // can be false, line or arrow,
+      fieldHeight: 800
     };
 
     this.initialState = {        
@@ -210,17 +211,17 @@ class BoardDrag extends Component {
     return (
       <div>
 
-      <AppBar position="static">
-        <Toolbar>
-          {/* <IconButton color="inherit" aria-label="Menu">
-            <MenuIcon />
-          </IconButton> */}
-          <Typography variant="h6" color="inherit">
-            Playbook Maker
-          </Typography>
-          <Button color="inherit" style={{ position: 'absolute', right: 200 }} onClick={this.loadSample}>Load Example</Button>
-          <Button color="inherit" style={{ position: 'absolute', right: 15 }} onClick={this.clearChanges}>Clear Changes</Button>     
-        </Toolbar>
+        <AppBar position="static">
+          <Toolbar>
+            {/* <IconButton color="inherit" aria-label="Menu">
+              <MenuIcon />
+            </IconButton> */}
+            <Typography variant="h6" color="inherit">
+              Playbook Maker
+            </Typography>
+            <Button color="inherit" style={{ position: 'absolute', right: 200 }} onClick={this.loadSample}>Load Example</Button>
+            <Button color="inherit" style={{ position: 'absolute', right: 15 }} onClick={this.clearChanges}>Clear Changes</Button>     
+          </Toolbar>
       </AppBar>
 
       <ActionToolbar 
@@ -233,7 +234,7 @@ class BoardDrag extends Component {
       
       <Stage 
         width={window.innerWidth} 
-        height={window.innerHeight}
+        height={this.state.fieldHeight}
         onMouseMove={this.handleMouseMove}
         onMouseUp={this.handleMouseUp}
         onMouseDown={this.handleMouseDown}
@@ -245,6 +246,8 @@ class BoardDrag extends Component {
       }}
       >
       
+      <FootballField height={this.state.fieldHeight}/>
+
       {/* <Editor addToBoard={this.addToBoard} /> */}
       
       <Layer 
@@ -259,13 +262,6 @@ class BoardDrag extends Component {
       }
 
         <Text y={30} x={ 50 } text = "Double Click any item to delete it" />
-
-
-      <KonvaLine 
-        points={[ 0, window.innerHeight / 2, window.innerWidth, window.innerHeight / 2]}
-        stroke='black'
-        tension={2}
-      />
   
       {
         this.state.ohs.map( (oh, index) => {
