@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { Stage, Layer, Text } from 'react-konva';
 import FootballField from './layers/FootballField';
-
+import { Stage, Layer, Text } from 'react-konva';
 import { Oh, CustomText, Ex, Square } from './drag/Icons';
 import { Line, DottedLine, Arrow } from './draw/Lines';
 import ActionToolbar from './Toolbar';
@@ -26,9 +25,20 @@ class BoardDrag extends Component {
       arrows: [],
       squares: [],
       dottedLines: [],
+<<<<<<< Updated upstream
       drawMode: false, // can be false, line or arrow,
       fieldHeight: 800
+=======
+      drawMode: false, // can be false, line or arrow
+      straightMode: true
+>>>>>>> Stashed changes
     };
+
+    this.history = {
+      past: [],
+      future: [], 
+      present: []
+    }
 
     this.initialState = {        
       textes: [],
@@ -39,7 +49,7 @@ class BoardDrag extends Component {
       squares: [],
       dottedLines: [],
       drawMode: false, // can be false, line or arrow
-      straightMode: false
+      straightMode: true
     };
   }
   
@@ -67,9 +77,35 @@ class BoardDrag extends Component {
   
   saveProgress = () => {
     let activeState = Object.assign(this.state, {});
+
+    if ( this.history.present.length ) {
+      this.history.past.push(this.history.present.pop());
+    }
+
+    this.history.present.push(activeState);
     
     window.sessionStorage.setItem( 'playbook-active', JSON.stringify(activeState) );
+    this.getLocalChanges();
   };
+
+  undo = () => {
+    let past = this.history.past.pop();
+    this.history.future.push(this.state); 
+
+
+    this.setState(past, _ => {
+      window.sessionStorage.setItem( 'playbook-active', JSON.stringify( Object.assign(this.state, {}) ) );
+    });
+  }
+
+  redo = () => {
+    let future = this.history.future.pop();
+    this.history.past.push(this.state);
+
+    this.setState(future, _ => {
+      window.sessionStorage.setItem( 'playbook-active', JSON.stringify( Object.assign(this.state, {}) ) );
+    })
+  }
   
   getLocalChanges = () => {
     var initialState;
@@ -109,7 +145,24 @@ class BoardDrag extends Component {
       this.setState({ [type]: thing }, this.saveProgress);
     }
   };
+
+  componentDidMount(){
+      document.addEventListener("keydown", this._handleKeyDown);
+  }
+
+  componentWillUnmount() {
+      document.removeEventListener("keydown", this._handleKeyDown);
+  }
   
+  _handleKeyDown = e => {
+    // Start new line on space press
+    if ( e.key == ' ' && this.state.drawMode && this.state.straightMode ) {
+      let lines = this.state[this.state.drawMode];
+
+      lines.push({points: []});
+    }
+  }
+
   handleMouseMove = e => {
     if ( this.state.drawMode && !this.state.straightMode ) {
       // there are several ways to get stage reference
@@ -146,20 +199,7 @@ class BoardDrag extends Component {
 
   handleMouseUp = e => {
     
-    if ( this.state.drawMode ) {
-      if ( this.state.editing ) {
-        let lines = this.state[this.state.drawMode];
-      
-        lines.push({
-          points: this.state.editing
-        })
-
-        this.setState({
-          [this.state.drawMode]: lines, 
-          editing: false
-        }, this.saveProgress);
-      }
-      
+    if ( this.state.drawMode ) {      
       if ( this.state.straightMode ) {
           let lines = this.state[this.state.drawMode];
 
@@ -170,14 +210,37 @@ class BoardDrag extends Component {
           let x = cursor.x;
           let y = cursor.y;
 
-          if ( lines.length )
+          if ( lines.length ) {
+            var pointsLength = lines[lines.length -1].points.length;
+
+            if ( pointsLength && pointsLength > 2 ) {
+              let y1 = lines[lines.length -1].points[pointsLength - 1];
+              let x1 = lines[lines.length -1].points[pointsLength - 2];
+            
+             lines[lines.length -1].points.push(x1,y1);           
+            }
+
             lines[lines.length -1].points.push(x,y);
+          }
           else 
             lines.push({ points: [x,y] });
 
           this.setState({[this.state.drawMode]: lines}, this.saveProgress);
 
-        }   
+        } else {
+          if ( this.state.editing ) {
+            let lines = this.state[this.state.drawMode];
+          
+            lines.push({
+              points: this.state.editing
+            })
+    
+            this.setState({
+              [this.state.drawMode]: lines, 
+              editing: false
+            }, this.saveProgress);
+          }
+        }
     }
   };
   
@@ -209,7 +272,9 @@ class BoardDrag extends Component {
     var total = 0;
     
     return (
-      <div>
+      <div
+        onKeyDown={this.handleKeyDown}
+      >
 
         <AppBar position="static">
           <Toolbar>
@@ -227,9 +292,22 @@ class BoardDrag extends Component {
       <ActionToolbar 
         addToBoard={this.addToBoard}
         setMode={ (mode) => {
+          if ( mode && this.state.straightMode ) {
+            var lines  = this.state[mode];
+
+            lines.push({ points: [] });
+            this.setState({lines: lines});
+          } 
+
           this.setState({ drawMode: mode });   
         }}
+        undo={this.undo}
+        redo={this.redo}
+        hasFuture={this.history.future.length}
+        hasPast={this.history.past.length}       
         drawMode={this.state.drawMode}
+        straightMode={this.state.straightMode}
+        toggleStraightMode={ _ => this.setState({ straightMode: !this.state.straightMode }) }
       />
       
       <Stage 
@@ -256,7 +334,10 @@ class BoardDrag extends Component {
       
       {
         this.state.drawMode ? 
-        <Text y={15} x={ 50 } text = "Mode: Drawing. Click and hold to draw. Release the mouse to finish drawing." />
+          this.state.straightMode ? 
+          <Text y={15} x={ 50 } text = "Mode: Drawing (straight mode). Click to add points to the line. Press the spacebar to start a new line." />
+          : 
+          <Text y={15} x={ 50 } text = "Mode: Drawing. Click and hold to draw. Release the mouse to finish drawing." />
         :
         <Text y={15} x={ 50 } text = "Mode: Dragging. Click on an icon to move them around. Double Click any item to delete it" />
       }

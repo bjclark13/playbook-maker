@@ -1,12 +1,16 @@
 import React from 'react';
 import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
+import StraightIcon from '@material-ui/icons/Straighten';
+
 import DragIndicator from '@material-ui/icons/DragIndicator';
 import Fab from '@material-ui/core/Fab';
 import { withStyles } from '@material-ui/core/styles';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import Tooltip from '@material-ui/core/Tooltip';
+import RedoIcon from '@material-ui/icons/Redo';
+import UndoIcon from '@material-ui/icons/Undo';
 
 
 const styles = theme => ({
@@ -51,6 +55,29 @@ class AppToolbar extends React.Component {
     render() {
         return(
         <div style={{zIndex: 999}}>
+
+        {
+            this.props.drawMode ? 
+            <Tooltip title="Straight Mode" aria-label="Straight Mode">
+                <Fab 
+                    color={ this.props.straightMode ? 'primary' : 'default' } 
+                    aria-label="Draw" 
+                    style={{ 
+                        position: 'fixed',
+                        zIndex: 999,
+                        bottom: 80,
+                        right: 85
+                    }}
+                    buttonRef={node => {
+                        this.anchorElDraw = node;
+                    }}
+                    onClick={ _ => this.props.toggleStraightMode() }
+                >
+                    <StraightIcon />
+                </Fab>
+            </Tooltip> : null
+        }
+
         <Tooltip title="Draw Mode" aria-label="Draw Mode">
             <Fab 
                 color={ this.props.drawMode ? 'primary' : 'default' } 
@@ -88,6 +115,45 @@ class AppToolbar extends React.Component {
                 <AddIcon />
             </Fab>
         </Tooltip>
+
+        {
+            this.props.hasPast ? 
+            <Tooltip title="Undo" aria-label="Undo">
+            <Fab 
+                color={'default' } 
+                aria-label="Draw" 
+                style={{ 
+                    position: 'fixed',
+                    zIndex: 999,
+                    bottom: 10,
+                    right: 85
+                }}
+                onClick={this.props.undo}
+             >
+                <UndoIcon />
+            </Fab>
+        </Tooltip> : null
+        }
+
+        {
+            this.props.hasFuture ? 
+            <Tooltip title="Redo" aria-label="Redo">
+                <Fab 
+                    color={'default' } 
+                    aria-label="Draw" 
+                    style={{ 
+                        position: 'fixed',
+                        zIndex: 999,
+                        bottom: 10,
+                        right: 155
+                    }}
+                    onClick={this.props.redo}
+                >
+                    <RedoIcon />
+                </Fab>
+            </Tooltip>
+            : null
+        }
 
         <Tooltip title="Drag Mode" aria-label="Drag Mode">
             <Fab 
