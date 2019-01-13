@@ -25,13 +25,9 @@ class BoardDrag extends Component {
       arrows: [],
       squares: [],
       dottedLines: [],
-<<<<<<< Updated upstream
-      drawMode: false, // can be false, line or arrow,
-      fieldHeight: 800
-=======
+      fieldHeight: 800,
       drawMode: false, // can be false, line or arrow
-      straightMode: true
->>>>>>> Stashed changes
+      straightMode: false
     };
 
     this.history = {
@@ -53,8 +49,13 @@ class BoardDrag extends Component {
     };
   }
   
-  componentDidMount() {
+  componentDidMount(){
     this.getLocalChanges();
+    document.addEventListener("keydown", this._handleKeyDown);
+  }
+
+  componentWillUnmount() {
+      document.removeEventListener("keydown", this._handleKeyDown);
   }
   
   handleDragStart = e => {
@@ -108,9 +109,9 @@ class BoardDrag extends Component {
   }
   
   getLocalChanges = () => {
-    var initialState;
-    
-    if ( initialState = window.sessionStorage.getItem('playbook-active') ) {
+    var initialState = window.sessionStorage.getItem('playbook-active');
+
+    if ( initialState ) {
       this.setState(JSON.parse(initialState));
     }
   };
@@ -145,14 +146,6 @@ class BoardDrag extends Component {
       this.setState({ [type]: thing }, this.saveProgress);
     }
   };
-
-  componentDidMount(){
-      document.addEventListener("keydown", this._handleKeyDown);
-  }
-
-  componentWillUnmount() {
-      document.removeEventListener("keydown", this._handleKeyDown);
-  }
   
   _handleKeyDown = e => {
     // Start new line on space press
@@ -262,9 +255,10 @@ class BoardDrag extends Component {
     }, item);
     
     items.push(newItem);
-    
+
     this.setState({
-      [type]: items
+      [type]: items,
+       drawMode: false
     })
   };
   
@@ -296,7 +290,7 @@ class BoardDrag extends Component {
             var lines  = this.state[mode];
 
             lines.push({ points: [] });
-            this.setState({lines: lines});
+            this.setState({ [mode]: lines });
           } 
 
           this.setState({ drawMode: mode });   
@@ -325,8 +319,6 @@ class BoardDrag extends Component {
       >
       
       <FootballField height={this.state.fieldHeight}/>
-
-      {/* <Editor addToBoard={this.addToBoard} /> */}
       
       <Layer 
         ref = { ref => this.layerRef = ref }
