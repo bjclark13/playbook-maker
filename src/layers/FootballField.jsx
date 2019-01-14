@@ -1,11 +1,10 @@
 import React from 'react';
-import { Stage, Layer, Text, Line, Group } from 'react-konva';
+import { Layer, Text, Line, Group } from 'react-konva';
 
 class FootballField extends React.Component {
     constructor( props ) {
         super(props);
         this.state = {
-            lineColor: 'black',
             height: this.getHeight(),
             width: this.getWidth()
         };
@@ -33,67 +32,72 @@ class FootballField extends React.Component {
         return(
             <Layer>
 
-								{[...Array( Math.floor((this.state.height / 2) / 10))].map((value, index) => {
-									let y = (this.state.height / 2) + (index * 15);
-									let y2 = y - (index * 30);
+				{[...Array( Math.floor((this.state.height / 2) / 10))].map((value, index) => {
+					let y = (this.state.height / 2) + (index * 20);
+					let y2 = y - (index * 40);
 
-									let x = this.state.width / 3;
-									let hashLength = 5;
+					let x = this.state.width / 3;
+					let hashLength = 5;
 
-									return (
-										<Group>
-											{
-												( 0 === (index % 10)	) ? 
-												<Group>
-													<Line 
-													points={[ 0, y, this.state.width, y]}
-													stroke={this.state.lineColor}
-													tension={2}
-													/>
-														<Line 
-														points={[ 0, y2, this.state.width, y2]}
-														stroke={this.state.lineColor}
-														tension={2}
-														/>
+					return (
+						<Group>
+							{
+								( 0 === (index % 5) ) ? 
+								<Group>
+									<Line 
+									points={[ 0, y, this.state.width, y]}
+									stroke={this.props.styles[this.props.theme].lines}
+									tension={2}
+									/>
+										<Line 
+										points={[ 0, y2, this.state.width, y2]}
+										stroke={this.props.styles[this.props.theme].lines}
+										tension={2}
+										/>
 
-														<Text x={120} y= {y - 28} text={50 - index} fontSize={50} rotation={90}/>
-														<Text x={120} y= {y2 - 28} text={50 - index} fontSize={50} rotation={90}/>
+									{ ( 0 === (index % 10) ) ?
+									<Group>
+										<Text fill={this.props.styles[this.props.theme].lines} x={120} y= {y - 28} text={50 - index} fontSize={50} rotation={90} />
+										<Text fill={this.props.styles[this.props.theme].lines} x={120} y= {y2 - 28} text={50 - index} fontSize={50} rotation={90}/>
 
-														<Text x={this.state.width - 120} y= {y - 28} text={ 50 - index} fontSize={50} rotation={90} />
-														<Text x={this.state.width - 120} y= {y2 - 28 } text={ 50 - index} fontSize={50} rotation={90} />
+										<Text fill={this.props.styles[this.props.theme].lines} x={this.state.width - 120} y= {y - 28} text={ 50 - index} fontSize={50} rotation={90} />
+										<Text fill={this.props.styles[this.props.theme].lines} x={this.state.width - 120} y= {y2 - 28 } text={ 50 - index} fontSize={50} rotation={90} />
+									</Group>
+										: null
+									}
+										
+								</Group>
+								: 
+								<Group>
+								<Line 
+									points={[ x - hashLength, y, x + hashLength, y]}
+									stroke={this.props.styles[this.props.theme].lines}
+									tension={2}
+								/>
 
-												</Group>
-												: 
-												<Group>
-												<Line 
-													points={[ x - hashLength, y, x + hashLength, y]}
-													stroke={this.state.lineColor}
-													tension={2}
-												/>
-		
-												<Line 
-													points={[ 2 * x - hashLength, y, 2 * x + hashLength, y]}
-													stroke={this.state.lineColor}
-													tension={2}
-												/>
-		
-												<Line 
-													points={[ x - hashLength, y2, x + hashLength, y2]}
-													stroke={this.state.lineColor}
-													tension={2}
-												/>
-		
-												<Line 
-													points={[ 2 * x - hashLength, y2, 2 * x + hashLength, y2 ]}
-													stroke={this.state.lineColor}
-													tension={2}
-												/>
-												</Group>
-											}
+								<Line 
+									points={[ 2 * x - hashLength, y, 2 * x + hashLength, y]}
+									stroke={this.props.styles[this.props.theme].lines}
+									tension={2}
+								/>
 
-										</Group>
-									);
-								})}
+								<Line 
+									points={[ x - hashLength, y2, x + hashLength, y2]}
+									stroke={this.props.styles[this.props.theme].lines}
+									tension={2}
+								/>
+
+								<Line 
+									points={[ 2 * x - hashLength, y2, 2 * x + hashLength, y2 ]}
+									stroke={this.props.styles[this.props.theme].lines}
+									tension={2}
+								/>
+								</Group>
+							}
+
+						</Group>
+					);
+				}, this)}
             </Layer>
             )
         }
