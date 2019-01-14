@@ -504,7 +504,7 @@ class BoardDrag extends Component {
               <MenuIcon />
             </IconButton>
             <Typography variant="h6" color="inherit">
-              Playbook Maker
+              Play Maker
             </Typography>
 
             <InputBase

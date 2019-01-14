@@ -234,7 +234,7 @@ class AppToolbar extends React.Component {
                             this.handleClose();
                         }
                     }> TE </MenuItem>
-                    <MenuItem onClick={this.handleClose}>Custom Text</MenuItem>
+                    {/* <MenuItem onClick={this.setState({ customTextForm: true })}>Custom Text</MenuItem> */}
                 </Menu>
 
                 <Menu
